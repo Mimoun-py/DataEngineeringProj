@@ -1,0 +1,16 @@
+# Airflow
+logs/
+.env
+
+# Data
+data/
+*.parquet
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Output
+data/output/
