@@ -1,16 +1,20 @@
 # Airflow
 logs/
-.env
+plugins/
+config/
 
 # Data
 data/
+output/
 *.parquet
 *.csv
 
+# Credentials
+.env
+
 # Python
 __pycache__/
+pipeline/__pycache__/
+pipeline/logs/
 *.pyc
 .venv/
-
-# Output
-data/output/

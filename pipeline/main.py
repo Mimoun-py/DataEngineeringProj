@@ -1,46 +1,47 @@
-import os
+import sys
+import logging
+
+# Make pipeline modules importable when called from Airflow
+sys.path.insert(0, '/opt/airflow/pipeline')
+
 from reader import Reader
 from validator import Validator
 from processor import Processor
 from writer import Writer
-import logging
-from datetime import datetime
 
-os.makedirs('logs', exist_ok=True)
+# Paths inside the Docker container (mounted via docker-compose volumes)
+INPUT_PATH  = '/opt/airflow/data/yellow_tripdata_2025-01.parquet'
+OUTPUT_PATH = '/opt/airflow/output/yellow_tripdata_processed_2025-01.parquet'
+BLOB_NAME   = 'yellow-taxi/yellow_taxi_processed_2025-01.parquet'
 
 logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-        , handlers=[
-            logging.FileHandler(f"logs/pipeline{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", mode='a'),
-            logging.StreamHandler()
-        ] 
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
 )
 
-def main():
-    # Step 1: Read the data
-    file_path = '../data/yellow_tripdata_2025-01.parquet'
-    reader = Reader(file_path)
+
+def run_pipeline():
+    # Step 1: Read
+    reader = Reader(INPUT_PATH)
     df = reader.read_file()
     if df is None:
-        logging.error("Data reading failed. Exiting pipeline.")
-        return
-    
-    # Step 2: Validate the data and log any issues
+        raise ValueError(f"Reading failed. File not found or unreadable: {INPUT_PATH}")
+
+    # Step 2: Validate
     validator = Validator()
     df, report = validator.validate(df)
-    logging.info(f"Validation report: {report}")
-    
-    # Step 3: Process the data
+    logging.info(f"Validation complete. {report.summary()}")
+
+    # Step 3: Process
     processor = Processor()
     df = processor.process(df)
-    logging.info("Data processing complete.")
 
-    # Step 4: Write the processed data to Azure Blob Storage and locally
+    # Step 4: Write locally and to Azure Blob Storage
     writer = Writer()
-    writer.write(df, file_path="../data/output/processed_data.parquet", blob_name="processed_data.parquet")
-    logging.info("Data writing complete.")
+    writer.write(df, OUTPUT_PATH, BLOB_NAME)
+    logging.info("Pipeline complete!")
+
 
 if __name__ == "__main__":
-    main()
-    
+    run_pipeline()
