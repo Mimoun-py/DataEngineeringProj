@@ -5,7 +5,6 @@ config/
 
 # Data
 data/
-output/
 *.parquet
 *.csv
 
