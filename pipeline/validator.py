@@ -86,6 +86,7 @@ class Validator:
         df = self._validate_location_ids(df, report)
         df = self._validate_payment_type(df, report)
         df = self._validate_fare_amount(df, report)
+        df = self._validate_total_amount(df, report)
         df = self._validate_tip_amount(df, report)
         df = self._validate_tolls_amount(df, report)
         df = self._validate_improvement_surcharge(df, report)
@@ -223,6 +224,23 @@ class Validator:
         # Zero fare is only valid for "No charge" (payment_type 3).
         mask_zero = (df['fare_amount'] == 0) & (df['payment_type'] != 3)
         df = self._drop(df, mask_zero, 'fare_amount', 'zero_non_no_charge', report)
+
+        return df
+
+    def _validate_total_amount(self, df, report):
+        # Null total_amount breaks revenue_per_mile downstream — mandatory, drop.
+        mask_null = df['total_amount'].isna()
+        df = self._drop(df, mask_null, 'total_amount', 'null', report)
+
+        # Negative total on a refund/dispute is documented behaviour — flag.
+        mask_neg_refund = (df['total_amount'] < 0) & \
+                           df['payment_type'].isin(self.REFUND_PAYMENT_TYPES)
+        df = self._flag(df, mask_neg_refund, 'total_amount', 'negative_refund', report)
+
+        # Negative total on any other payment type is corrupt data — drop.
+        mask_neg_other = (df['total_amount'] < 0) & \
+                         ~df['payment_type'].isin(self.REFUND_PAYMENT_TYPES)
+        df = self._drop(df, mask_neg_other, 'total_amount', 'negative_non_refund', report)
 
         return df
 

@@ -31,7 +31,6 @@ def run_pipeline():
     # Step 2: Validate
     validator = Validator()
     df, report = validator.validate(df)
-    logging.info(f"Validation complete. {report.summary()}")
 
     # Step 3: Process
     processor = Processor()
