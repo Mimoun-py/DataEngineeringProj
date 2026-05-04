@@ -1,7 +1,7 @@
 import sys
+import pendulum
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
-from datetime import datetime
 
 
 def run_pipeline_task():
@@ -12,8 +12,8 @@ def run_pipeline_task():
 
 with DAG(
     dag_id="yellow_taxi_pipeline",
-    start_date=datetime(2026, 1, 1),
-    schedule='10 15 5 5 *',
+    start_date=pendulum.datetime(2026, 1, 1, tz='Europe/Brussels'),
+    schedule='15 15 5 5 *',
     catchup=False,
 ) as dag:
     task = PythonOperator(
