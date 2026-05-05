@@ -4,7 +4,7 @@ import shutil
 from airflow import DAG
 from airflow.providers.standard.operators.python import PythonOperator
 from airflow.providers.standard.sensors.python import PythonSensor
-from airflow.api.common.trigger_dag import trigger_dag
+from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 from pendulum import timezone
 from datetime import datetime
 
@@ -29,10 +29,6 @@ def move_to_used():
     dest     = os.path.join(USED_DIR, filename)
     shutil.move(INPUT_FILE_PATH, dest)
     print(f"Moved {filename} to {USED_DIR}")
-
-
-def retrigger():
-    trigger_dag(dag_id="ecommerce_pipeline")
 
 
 with DAG(
@@ -61,9 +57,10 @@ with DAG(
         python_callable=move_to_used,
     )
 
-    retrigger_task = PythonOperator(
+    retrigger_task = TriggerDagRunOperator(
         task_id="retrigger_dag",
-        python_callable=retrigger,
+        trigger_dag_id="ecommerce_pipeline",
+        wait_for_completion=False,
     )
 
     wait_for_file >> run_pipeline_task >> move_file >> retrigger_task

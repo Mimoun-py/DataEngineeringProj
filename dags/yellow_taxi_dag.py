@@ -13,7 +13,7 @@ def run_pipeline_task():
 with DAG(
     dag_id="yellow_taxi_pipeline",
     start_date=pendulum.datetime(2026, 1, 1, tz='Europe/Brussels'),
-    schedule='15 15 5 5 *',
+    schedule='54 14 5 5 *',
     catchup=False,
 ) as dag:
     task = PythonOperator(
