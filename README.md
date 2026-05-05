@@ -6,7 +6,7 @@ put the yellow_tripdata_2025-01.parquet file inside the /data foler [link](https
 
 - you also need to sort out the .env file where you need the AIRFLOW_UID this you can put to 50000 as it its universly used like that just gives an id to everything that is airflow related.
 - then you also need your azure credentioals AZURE_CONNECTION_STRING, AZURE_CONTAINER_NAME if not provided i got you it just writes locally then to the /output folder
-- then for the last Eviarment variable you need \_PIP_ADDITIONAL_REQUIREMENTS this is like installing the packeges using pip but airflow does it for you. you can look at the requirements.txt and past it there or even better just copy this `_PIP_ADDITIONAL_REQUIREMENTS=pandas pyarrow azure-storage-blob python-dotenv numpy`
+- then for the last Eviarment variable you need \_PIP_ADDITIONAL_REQUIREMENTS this is like installing the packeges using pip but airflow does it for you. you can look at the requirements.txt and past it there or even better just copy this `_PIP_ADDITIONAL_REQUIREMENTS=pandas pyarrow azure-storage-blob python-dotenv numpy pendulum`
 
 then if you want to run it you can so manually or by changing the schedule parameter in the [dag](dags\yellow_taxi_dag.py)
 then it will run when the cron is set up no need to restart docker as airflow checks dag changes regularly

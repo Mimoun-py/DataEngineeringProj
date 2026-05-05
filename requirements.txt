@@ -3,3 +3,4 @@ pyarrow
 azure-storage-blob
 python-dotenv
 numpy
+pendulum
